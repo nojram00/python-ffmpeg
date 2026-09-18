@@ -3,10 +3,10 @@ FFMPEG Python Helper - A Python wrapper for FFMPEG video processing.
 
 This package provides a simple, intuitive API for common video processing tasks
 including format conversion, GIF creation, video trimming, audio extraction,
-and in-memory processing.
+in-memory processing, and data pipeline utilities.
 
 Example:
-    >>> from ffmpeg_python_helper import FFMPEG
+    >>> from ffmpeg_python_helper import FFMPEG, Pipe
     >>> ffmpeg = FFMPEG()
     >>> ffmpeg.reformat("input.mp4", "output.avi")
     >>> ffmpeg.gif("video.mp4", "animation.gif", fps=15, scale=480)
@@ -19,9 +19,19 @@ Example:
     >>> gif_data = ffmpeg.gifs(video_data, fps=15, scale=480)
     >>> trimmed_data = ffmpeg.trims(video_data, start=0, duration=30)
     >>> audio_data = ffmpeg.extract_audios(video_data, output_format="m4a")
+    >>> 
+    >>> # Pipeline processing
+    >>> def process_video(data: bytes) -> bytes:
+    ...     return ffmpeg.trims(data, start=0, duration=30)
+    >>> 
+    >>> def convert_to_gif(data: bytes) -> bytes:
+    ...     return ffmpeg.gifs(data, fps=15, scale=480)
+    >>> 
+    >>> processed_data = Pipe.pipe_bytes(video_data, process_video, convert_to_gif)
 
 For detailed API documentation, see:
     - FFMPEG class documentation
+    - Pipe class documentation
     - README.md for usage examples and tutorials
 """
 

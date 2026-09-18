@@ -7,7 +7,8 @@ A Python wrapper for FFMPEG that provides a simple, intuitive API for common vid
 - 🔧 **Easy FFMPEG Integration** - Automatically detects FFMPEG installation
 - 🎥 **Video Processing** - Reformat videos between formats
 - 🎞️ **GIF Creation** - Convert videos to optimized GIFs with customizable settings
-- 🧠 **In-Memory Processing** - Process video data directly from bytes without temporary files
+- 🎵 **Audio Extraction** - Extract audio tracks from videos without re-encoding
+- 🧠 **In-Memory Processing** - Process video/audio data directly from bytes without temporary files
 - ✂️ **Video Trimming** - Trim videos with precise start time and duration control
 - 🐍 **Pythonic API** - Clean, object-oriented interface with proper error handling
 - 📁 **File Validation** - Automatic input file existence checking
@@ -48,12 +49,13 @@ output = ffmpeg.reformat("input.mp4", "output.avi")
 print(output.decode())
 
 # Create a GIF from video
-output = ffmpeg.gif("video.mp4", "animation.gif", fps=15, scale=480)
-print(output.decode())
+ffmpeg.gif("video.mp4", "animation.gif", fps=15, scale=480)
 
 # Trim a video
-output = ffmpeg.trim("video.mp4", "short_clip.mp4", start=10.5, duration=5.0)
-print(output.decode())
+ffmpeg.trim("video.mp4", "short_clip.mp4", start=10.5, duration=5.0)
+
+# Extract audio from video
+ffmpeg.extract_audio("video.mp4", "audio.m4a")
 
 # Create GIF from in-memory video data
 with open("video.mp4", "rb") as f:
@@ -61,6 +63,16 @@ with open("video.mp4", "rb") as f:
 gif_data = ffmpeg.gifs(video_data, fps=15, scale=480)
 with open("memory.gif", "wb") as f:
     f.write(gif_data)
+
+# Trim video in memory
+trimmed_data = ffmpeg.trims(video_data, start=0, duration=30)
+with open("trimmed.mp4", "wb") as f:
+    f.write(trimmed_data)
+
+# Extract audio in memory
+audio_data = ffmpeg.extract_audios(video_data, output_format="m4a")
+with open("audio.m4a", "wb") as f:
+    f.write(audio_data)
 ```
 
 ## API Reference

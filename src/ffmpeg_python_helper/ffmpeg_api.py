@@ -374,6 +374,9 @@ in your system PATH.
         and optionally ending after a specified duration. This method is useful
         when you have video data in memory and want to avoid writing temporary files.
 
+        Note: For MP4 format, this method uses libx264 video codec and AAC audio codec
+        with fragmented MP4 output for better streaming compatibility.
+
         Args:
             input_bytes: Video data as bytes to trim.
             start: Start time in seconds. Defaults to 0.
@@ -403,6 +406,10 @@ in your system PATH.
             >>> webm_data = ffmpeg.trims(video_data, start=10, duration=5, format_type="webm")
             >>> with open("clip.webm", "wb") as f:
             ...     f.write(webm_data)
+            >>> 
+            >>> # Trim with specific codec settings
+            >>> # For non-MP4 formats, FFMPEG will use default codecs
+            >>> avi_data = ffmpeg.trims(video_data, start=5, duration=10, format_type="avi")
         """
         args = [
             "-y",
