@@ -1,7 +1,7 @@
 [project]
 name = "ffmpeg-python-helper"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python wrapper for FFMPEG that provides a simple, intuitive API for common video processing tasks including format conversion, GIF creation, and video trimming."
 readme = "README.md"
 authors = [
     { name = "marjon", email = "marjongodito@gmanmi.com" }
