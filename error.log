@@ -1,0 +1,38 @@
+Traceback (most recent call last):
+  File "C:\Users\Public\devs\ffmpeg-python-helper\test_run.py", line 16, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Public\devs\ffmpeg-python-helper\test_run.py", line 10, in main
+    stdout, stderr = FFMPEG.api().gif(str(OUTPUT_VIDEO), str(OUTPUT_GIF))
+                     ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Public\devs\ffmpeg-python-helper\src\ffmpeg_python_helper\ffmpeg_api.py", line 69, in gif
+    raise RuntimeError(stderr)
+RuntimeError: ffmpeg version 9.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers
+  built with gcc 16.1.0 (Rev2, Built by MSYS2 project)
+  configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-cairo --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-libfribidi --enable-libharfbuzz --enable-libvidstab --enable-libvmaf --enable-libzimg --enable-amf --enable-cuda-llvm --enable-cuvid --enable-dxva2 --enable-d3d11va --enable-d3d12va --enable-ffnvcodec --enable-libvpl --enable-nvdec --enable-nvenc --enable-vaapi --enable-openal --enable-libgme --enable-libopenmpt --enable-libopencore-amrwb --enable-libmp3lame --enable-libtheora --enable-libvo-amrwbenc --enable-libgsm --enable-libopencore-amrnb --enable-libopus --enable-libspeex --enable-libvorbis --enable-librubberband
+  libavutil      61.  1.101 / 61.  1.101
+  libavcodec     63.  1.101 / 63.  1.101
+  libavformat    63.  1.101 / 63.  1.101
+  libavdevice    63.  1.101 / 63.  1.101
+  libavfilter    12.  1.101 / 12.  1.101
+  libswscale     10.  1.101 / 10.  1.101
+  libswresample   7.  1.101 /  7.  1.101
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\Users\Public\devs\ffmpeg-python-helper\sample-vid\clip.mp4':
+  Metadata:
+    major_brand     : isom
+    minor_version   : 512
+    compatible_brands: isomiso2avc1mp41
+    encoder         : Lavf63.1.101
+  Duration: 00:00:05.01, start: 0.000000, bitrate: 1156 kb/s
+  Stream #0:0[0x1](und): Video: h264 (High) (avc1 / 0x31637661), yuv420p(tv, bt709, progressive), 1280x720 [SAR 1:1 DAR 16:9], 1024 kb/s, 29.97 fps, 29.97 tbr, 30k tbn, start 0.033367 (default)
+    Metadata:
+      handler_name    : ISO Media file produced by Google Inc.
+      encoder         : Lavc63.1.101 libx264
+  Stream #0:1[0x2](eng): Audio: aac (LC) (mp4a / 0x6134706D), 44100 Hz, stereo, fltp, 127 kb/s (default)
+    Metadata:
+      handler_name    : ISO Media file produced by Google Inc.
+[swscaler @ 00000209428cb900] [Eval @ 000000e85dffd0d0] Undefined constant or missing '(' in 'lanczossplit'
+[swscaler @ 00000209428cb900] Unable to parse "sws_flags" option value "lanczossplit"
+[AVFilterGraph @ 00000209428dee40] Error initializing filters
+Error opening output file C:\Users\Public\devs\ffmpeg-python-helper\sample-vid\clip.gif.
+Error opening output files: Invalid argument

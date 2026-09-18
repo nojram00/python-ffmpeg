@@ -1,0 +1,29 @@
+[project]
+name = "ffmpeg-python-helper"
+version = "0.1.0"
+description = "Python FFmpeg helper with bundled FFmpeg binaries"
+readme = "README.md"
+authors = [
+    { name = "marjon", email = "marjongodito@gmanmi.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+ffmpeg-python-helper = "ffmpeg_python_helper:main"
+
+[build-system]
+requires = [
+    "hatchling>=1.27,<2"
+]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ffmpeg_python_helper"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/ffmpeg_python_helper/**",
+    "README.md",
+    "pyproject.toml",
+]
