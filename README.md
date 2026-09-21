@@ -701,9 +701,8 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ffmpeg-python-helper/issues)
-- **Documentation**: [ReadTheDocs](https://ffmpeg-python-helper.readthedocs.io)
-- **Email**: marjongodito@gmanmi.com
+- **Issues**: [GitHub Issues](https://github.com/nojram00/python-ffmpeg/issues)
+- **Email**: marjongodito.0505@gmail.com
 
 ## Acknowledgments
 
