@@ -38,11 +38,13 @@ For detailed API documentation, see:
 from .ffmpeg_api import FFMPEG
 from .pipe_helper import Pipe
 from .ffprobe_api import FFProbe
+from .async_ffmpeg_api import AsyncFFMPEG
 
 __all__ = [
     'FFMPEG',
     'Pipe',
-    'FFProbe'
+    'FFProbe',
+    'AsyncFFMPEG'
 ]
 
 __version__ = "0.1.0"
