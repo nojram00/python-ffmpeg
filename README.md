@@ -11,6 +11,7 @@ A Python wrapper for FFMPEG that provides a simple, intuitive API for common vid
 - 🧠 **In-Memory Processing** - Process video/audio data directly from bytes without temporary files
 - ✂️ **Video Trimming** - Trim videos with precise start time and duration control
 - 🔍 **Video Metadata Analysis** - Extract video information and metadata using FFProbe
+- ⚡ **Asynchronous Operations** - Non-blocking async API for responsive applications
 - 🐍 **Pythonic API** - Clean, object-oriented interface with proper error handling
 - 📁 **File Validation** - Automatic input file existence checking
 
@@ -94,6 +95,25 @@ stdout, stderr = ffprobe.execute("-v", "quiet", "-print_format", "json",
 metadata = json.loads(stdout.decode())
 print(f"Video duration: {metadata['format']['duration']} seconds")
 print(f"Video dimensions: {metadata['streams'][0]['width']}x{metadata['streams'][0]['height']}")
+
+# Use AsyncFFMPEG for non-blocking operations
+import asyncio
+from ffmpeg_python_helper import AsyncFFMPEG
+
+async def process_video_async():
+    async_ffmpeg = AsyncFFMPEG()
+    print(f"AsyncFFMPEG executable found at: {async_ffmpeg.executable}")
+    
+    # Convert video asynchronously
+    output = await async_ffmpeg.reformat("input.mp4", "output_async.avi")
+    print(f"Async conversion output: {output.decode()[:50]}...")
+    
+    # Create GIF asynchronously
+    await async_ffmpeg.gif("video.mp4", "animation_async.gif", fps=15, scale=480)
+    print("Async GIF creation completed!")
+
+# Run the async function
+asyncio.run(process_video_async())
 ```
 
 ## API Reference
@@ -337,6 +357,156 @@ for video in videos:
         print(f"{video}: Too long (> 5 seconds)")
 ```
 
+### `AsyncFFMPEG` Class
+
+An asynchronous Python wrapper for FFMPEG that provides a simple, intuitive API for common video processing tasks with non-blocking operations.
+
+This class provides all the same functionality as the `FFMPEG` class but with asynchronous methods, allowing you to perform video processing operations without blocking your application. This is especially useful for web applications, GUI applications, or any scenario where you need to maintain responsiveness while performing video processing tasks.
+
+#### Constructor
+```python
+AsyncFFMPEG()
+```
+Creates a new AsyncFFMPEG instance. Automatically searches for FFMPEG in the system PATH.
+- **Raises**: `FileNotFoundError` if FFMPEG is not found in PATH
+
+#### Properties
+- `executable` (str): The path to the FFMPEG executable found in the system
+
+#### Class Methods
+```python
+@classmethod
+def api(cls) -> "AsyncFFMPEG"
+```
+Factory method that returns a new AsyncFFMPEG instance.
+- **Returns**: `AsyncFFMPEG` instance
+
+#### Instance Methods
+
+All methods are asynchronous and must be awaited. The API mirrors the synchronous `FFMPEG` class but with `async`/`await` syntax.
+
+##### `async execute(*args: str, input_data: bytes | None = None) -> tuple[bytes, bytes]`
+Execute raw FFMPEG commands asynchronously with the given arguments.
+
+**Parameters:**
+- `*args` (str): FFMPEG command-line arguments
+- `input_data` (bytes | None, optional): Optional bytes to send to FFMPEG's stdin
+
+**Returns:**
+- `tuple[bytes, bytes]`: A tuple containing (stdout, stderr) as bytes
+
+**Raises:**
+- `FileNotFoundError`: If FFMPEG executable is not found
+- `RuntimeError`: If FFMPEG command returns a non-zero exit code
+
+**Example:**
+```python
+# Must be called within an async context
+stdout, stderr = await async_ffmpeg.execute("-version")
+print(stdout.decode())
+
+# Process data from memory asynchronously
+video_data = b"...video bytes..."
+stdout, stderr = await async_ffmpeg.execute("-i", "pipe:0", "-f", "null", "-", input_data=video_data)
+```
+
+##### `async reformat(input_file: str, output_file: str) -> bytes`
+Asynchronously convert a video file from one format to another.
+
+**Parameters:**
+- `input_file` (str): Path to the input video file
+- `output_file` (str): Path for the output video file
+
+**Returns:**
+- `bytes`: FFMPEG output (stdout or stderr) as bytes
+
+**Raises:**
+- `FileNotFoundError`: If input file doesn't exist
+
+**Example:**
+```python
+output = await async_ffmpeg.reformat("input.mov", "output.mp4")
+print(output.decode())
+```
+
+##### `async gif(input_file: str, output_file: str, fps: int = 10, scale: int = 320) -> bytes`
+Asynchronously convert a video file to an optimized GIF.
+
+**Parameters:**
+- `input_file` (str): Path to the input video file
+- `output_file` (str): Path for the output GIF file
+- `fps` (int, optional): Frames per second for the GIF (default: 10)
+- `scale` (int, optional): Width of the GIF in pixels, height is auto-scaled (default: 320)
+
+**Returns:**
+- `bytes`: FFMPEG output (stdout or stderr) as bytes
+
+**Raises:**
+- `FileNotFoundError`: If input file doesn't exist
+- `RuntimeError`: If GIF file was not created successfully
+
+**Example:**
+```python
+output = await async_ffmpeg.gif("video.mp4", "output.gif", fps=15, scale=640)
+print(output.decode())
+```
+
+##### `async gifs(input_byte: bytes, fps: int = 10, scale: int = 320) -> bytes`
+Asynchronously convert video data from bytes to an optimized GIF (in-memory processing).
+
+**Parameters:**
+- `input_byte` (bytes): Video data as bytes to convert to GIF
+- `fps` (int, optional): Frames per second for the GIF (default: 10)
+- `scale` (int, optional): Width of the GIF in pixels, height is auto-scaled (default: 320)
+
+**Returns:**
+- `bytes`: The generated GIF data as bytes
+
+**Raises:**
+- `RuntimeError`: If GIF conversion fails
+
+**Example:**
+```python
+# Read video data from a file
+with open("video.mp4", "rb") as f:
+    video_data = f.read()
+
+# Convert to GIF in memory asynchronously
+gif_data = await async_ffmpeg.gifs(video_data, fps=15, scale=480)
+
+# Save the GIF
+with open("output.gif", "wb") as f:
+    f.write(gif_data)
+```
+
+##### `async trim(input_file: str, output_file: str, start: float = 0, duration: float | None = None) -> bytes`
+Asynchronously trim a video file.
+
+**Parameters:**
+- `input_file` (str): Path to the input video file
+- `output_file` (str): Path for the output trimmed video
+- `start` (float, optional): Start time in seconds (default: 0)
+- `duration` (float | None, optional): Duration in seconds, or None for remaining video (default: None)
+
+**Returns:**
+- `bytes`: FFMPEG output (stdout or stderr) as bytes
+
+**Raises:**
+- `FileNotFoundError`: If input file doesn't exist
+- `ValueError`: If start is negative or duration is non-positive
+- `RuntimeError`: If trimmed video was not created successfully
+
+**Example:**
+```python
+# Trim from 5 seconds to 10 seconds (5-second clip) asynchronously
+output = await async_ffmpeg.trim("video.mp4", "clip.mp4", start=5, duration=5)
+print(output.decode())
+
+# Trim from 10 seconds to the end of video asynchronously
+output = await async_ffmpeg.trim("video.mp4", "ending.mp4", start=10)
+print(output.decode())
+```
+
 ## Advanced Usage
 
 ### Custom FFMPEG Commands
@@ -398,6 +568,37 @@ if audio_info['streams']:
     print(f"Audio codec: {audio_info['streams'][0]['codec_name']}")
     print(f"Audio channels: {audio_info['streams'][0]['channels']}")
     print(f"Sample rate: {audio_info['streams'][0]['sample_rate']} Hz")
+```
+
+### Asynchronous Batch Processing with AsyncFFMPEG
+AsyncFFMPEG is ideal for batch processing and web applications where you need to maintain responsiveness:
+
+```python
+import asyncio
+from ffmpeg_python_helper import AsyncFFMPEG
+
+async def process_videos_concurrently():
+    async_ffmpeg = AsyncFFMPEG()
+    videos = ["video1.mp4", "video2.mp4", "video3.mp4"]
+    
+    # Process multiple videos concurrently
+    tasks = []
+    for video in videos:
+        task = async_ffmpeg.gif(video, f"{video}_async.gif", fps=12, scale=400)
+        tasks.append(task)
+    
+    # Wait for all async tasks to complete
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    # Handle results
+    for video, result in zip(videos, results):
+        if isinstance(result, Exception):
+            print(f"Failed to process {video}: {result}")
+        else:
+            print(f"Successfully processed {video}: {len(result)} bytes output")
+
+# Run concurrent processing
+asyncio.run(process_videos_concurrently())
 ```
 
 ### Error Handling
