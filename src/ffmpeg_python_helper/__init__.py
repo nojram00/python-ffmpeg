@@ -37,10 +37,12 @@ For detailed API documentation, see:
 
 from .ffmpeg_api import FFMPEG
 from .pipe_helper import Pipe
+from .ffprobe_api import FFProbe
 
 __all__ = [
     'FFMPEG',
-    'Pipe'
+    'Pipe',
+    'FFProbe'
 ]
 
 __version__ = "0.1.0"

@@ -10,6 +10,7 @@ A Python wrapper for FFMPEG that provides a simple, intuitive API for common vid
 - 🎵 **Audio Extraction** - Extract audio tracks from videos without re-encoding
 - 🧠 **In-Memory Processing** - Process video/audio data directly from bytes without temporary files
 - ✂️ **Video Trimming** - Trim videos with precise start time and duration control
+- 🔍 **Video Metadata Analysis** - Extract video information and metadata using FFProbe
 - 🐍 **Pythonic API** - Clean, object-oriented interface with proper error handling
 - 📁 **File Validation** - Automatic input file existence checking
 
@@ -73,6 +74,26 @@ with open("trimmed.mp4", "wb") as f:
 audio_data = ffmpeg.extract_audios(video_data, output_format="m4a")
 with open("audio.m4a", "wb") as f:
     f.write(audio_data)
+
+# Analyze video metadata with FFProbe
+from ffmpeg_python_helper import FFProbe
+import json
+
+ffprobe = FFProbe()
+print(f"FFProbe executable found at: {ffprobe.executable}")
+
+# Check if video is short enough for social media
+if ffprobe.is_max_length("video.mp4", max_length=5.0):
+    print("Video is perfect for Instagram Reels!")
+else:
+    print("Video needs trimming for short-form content")
+
+# Get detailed video metadata
+stdout, stderr = ffprobe.execute("-v", "quiet", "-print_format", "json", 
+                                 "-show_format", "-show_streams", "video.mp4")
+metadata = json.loads(stdout.decode())
+print(f"Video duration: {metadata['format']['duration']} seconds")
+print(f"Video dimensions: {metadata['streams'][0]['width']}x{metadata['streams'][0]['height']}")
 ```
 
 ## API Reference
@@ -222,6 +243,100 @@ output = ffmpeg.trim("video.mp4", "ending.mp4", start=10)
 print(output.decode())
 ```
 
+### `FFProbe` Class
+
+A Python wrapper for FFProbe (the FFMPEG multimedia stream analyzer) that provides video metadata analysis capabilities.
+
+#### Constructor
+```python
+FFProbe()
+```
+Creates a new FFProbe instance. Automatically searches for FFProbe in the system PATH.
+- **Raises**: `FileNotFoundError` if FFProbe is not found in PATH
+
+#### Properties
+- `executable` (str): The path to the FFProbe executable found in the system
+
+#### Class Methods
+```python
+@classmethod
+def api(cls) -> "FFProbe"
+```
+Factory method that returns a new FFProbe instance.
+- **Returns**: `FFProbe` instance
+
+**Example:**
+```python
+ffprobe = FFProbe.api()
+print(f"FFProbe executable found at: {ffprobe.executable}")
+```
+
+#### Instance Methods
+
+##### `execute(*args: str, input_data: bytes | None = None) -> tuple[bytes, bytes]`
+Execute raw FFProbe commands with the given arguments.
+
+**Parameters:**
+- `*args` (str): FFProbe command-line arguments as strings
+- `input_data` (bytes | None, optional): Optional bytes to send to FFProbe's stdin
+
+**Returns:**
+- `tuple[bytes, bytes]`: A tuple containing (stdout, stderr) as bytes
+
+**Raises:**
+- `FileNotFoundError`: If FFProbe executable is not found
+- `RuntimeError`: If FFProbe command returns a non-zero exit code
+
+**Example:**
+```python
+# Get FFProbe version
+stdout, stderr = ffprobe.execute("-version")
+print(stdout.decode())
+
+# Get video metadata in JSON format
+stdout, stderr = ffprobe.execute("-v", "quiet", "-print_format", "json", 
+                                 "-show_format", "-show_streams", "video.mp4")
+metadata = json.loads(stdout.decode())
+print(f"Video duration: {metadata['format']['duration']} seconds")
+
+# Get video dimensions
+stdout, stderr = ffprobe.execute("-v", "error", "-select_streams", "v:0",
+                                 "-show_entries", "stream=width,height", 
+                                 "-of", "csv=p=0", "video.mp4")
+print(f"Video dimensions: {stdout.decode().strip()}")
+```
+
+##### `is_max_length(input_file: str, max_length: float = 5.0) -> bool`
+Check if a video file's duration is less than or equal to a specified maximum length.
+
+**Parameters:**
+- `input_file` (str): Path to the input video file
+- `max_length` (float, optional): Maximum allowed duration in seconds (default: 5.0)
+
+**Returns:**
+- `bool`: `True` if video duration ≤ max_length, `False` otherwise
+
+**Raises:**
+- `FileNotFoundError`: If input file doesn't exist
+- `RuntimeError`: If FFProbe command fails
+
+**Example:**
+```python
+# Check if video is shorter than 10 seconds
+if ffprobe.is_max_length("video.mp4", max_length=10.0):
+    print("Video is short enough for social media upload")
+else:
+    print("Video is too long, needs trimming")
+
+# Check multiple videos for length compliance
+videos = ["clip1.mp4", "clip2.mp4", "clip3.mp4"]
+for video in videos:
+    if ffprobe.is_max_length(video, max_length=5.0):
+        print(f"{video}: OK (≤ 5 seconds)")
+    else:
+        print(f"{video}: Too long (> 5 seconds)")
+```
+
 ## Advanced Usage
 
 ### Custom FFMPEG Commands
@@ -237,6 +352,52 @@ ffmpeg.execute("-i", "video.mp4", "-i", "watermark.png",
 
 # Change video bitrate
 ffmpeg.execute("-i", "input.mp4", "-b:v", "1M", "output.mp4")
+```
+
+### Advanced FFProbe Usage
+FFProbe provides powerful video metadata analysis capabilities:
+
+```python
+from ffmpeg_python_helper import FFProbe
+import json
+
+ffprobe = FFProbe()
+
+# Get multiple video metadata properties at once
+stdout, stderr = ffprobe.execute(
+    "-v", "error",
+    "-select_streams", "v:0",
+    "-show_entries", "stream=width,height,duration,bit_rate,codec_name",
+    "-of", "json",
+    "video.mp4"
+)
+video_info = json.loads(stdout.decode())
+print(f"Video codec: {video_info['streams'][0]['codec_name']}")
+print(f"Video bitrate: {video_info['streams'][0]['bit_rate']} bps")
+
+# Check frame rate
+stdout, stderr = ffprobe.execute(
+    "-v", "error",
+    "-select_streams", "v:0",
+    "-show_entries", "stream=r_frame_rate",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    "video.mp4"
+)
+print(f"Frame rate: {stdout.decode().strip()}")
+
+# Get audio stream information
+stdout, stderr = ffprobe.execute(
+    "-v", "error",
+    "-select_streams", "a:0",
+    "-show_entries", "stream=codec_name,channels,sample_rate",
+    "-of", "json",
+    "video.mp4"
+)
+audio_info = json.loads(stdout.decode())
+if audio_info['streams']:
+    print(f"Audio codec: {audio_info['streams'][0]['codec_name']}")
+    print(f"Audio channels: {audio_info['streams'][0]['channels']}")
+    print(f"Sample rate: {audio_info['streams'][0]['sample_rate']} Hz")
 ```
 
 ### Error Handling

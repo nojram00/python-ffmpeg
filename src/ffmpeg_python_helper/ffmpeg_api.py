@@ -366,7 +366,10 @@ in your system PATH.
     def trims(self, input_bytes: bytes,
             start: float = 0,
             duration: float | None = None,
-            format_type: str = "mp4") -> bytes:
+            format_type: str = "mp4",
+            v_encoder : str = "libx264",
+            a_encoder : str = "aac"
+            ) -> bytes:
         """
         Trim video data from bytes (in-memory processing).
 
@@ -422,9 +425,9 @@ in your system PATH.
 
         if format_type == 'mp4':
             args.extend([
-                "-c:v", "libx264",
+                "-c:v", v_encoder,
                 "-pix_fmt", "yuv420p",
-                "-c:a", "aac",
+                "-c:a", a_encoder,
                 "-movflags", "frag_keyframe+empty_moov"
             ])
 
@@ -524,3 +527,57 @@ in your system PATH.
         ]
 
         return self.execute(*args, input_data=input_bytes)[0]
+
+    def compress_file(self, 
+                input_file : str, 
+                output_file : str, 
+                crf: int = 28,
+                v_encoder : str = "libx264",
+                a_encoder : str = "aac" ,
+                px_format : str = "yuv420p"):
+
+            args = [
+                "-i", input_file,
+                "-c:v", v_encoder,
+                "-crf", str(crf),
+                "-pix_fmt", px_format,
+                "-c:a", a_encoder,
+                "-movflags", "faststart",
+                output_file,
+            ]
+
+            self.execute(*args)
+
+    def compress_byte(self, 
+            input_data : bytes,
+            crf: int = 28,
+            v_encoder : str = "libx264",
+            a_encoder : str = "aac" ,
+            px_format : str = "yuv420p"
+            ):
+        args = [
+            "-i", "pipe:0",
+            "-c:v", v_encoder,
+            "-crf", str(crf),
+            "-pix_fmt", px_format,
+            "-c:a", a_encoder,
+            "-movflags", "frag_keyframe+empty_moov",
+            "-f", "mp4",
+            "pipe:1"
+        ]
+
+        return self.execute(*args, input_data=input_data)[0]
+
+    def verify(self, input_file : str) -> tuple[bool, str]:
+        args = [
+            "-v", "error",
+            "-i", input_file,
+            "-f",  "null",
+            "-"
+        ]
+
+        try: 
+            self.execute(*args)
+            return True, ""
+        except RuntimeError as e:
+            return False, str(e)
